@@ -70,6 +70,8 @@ def summarize(action: str, srcs: list, outs: list, extra: str = "") -> Result:
     kind, _, name = action.partition(":")
     o0 = outs[0]
     good = ""
+    if category(src) == "video":
+        return summarize_video(kind, name, srcs, outs, before, after, extra)
 
     if kind == "convert":
         fmt = name
@@ -144,3 +146,43 @@ def summarize(action: str, srcs: list, outs: list, extra: str = "") -> Result:
 
     # generic
     return Result(name or action, f"{o0.name} · {human_size(after)}", outs, srcs)
+
+
+# ---------------------------------------------------------------- video
+def summarize_video(kind: str, name: str, srcs: list[Path], outs: list[Path], before: int, after: int,
+                    extra: str = "") -> Result:
+    from .video import fmt_time, try_probe
+    src, o0 = srcs[0], outs[0]
+    i0, i1 = try_probe(src), try_probe(o0) if category(o0) != "image" else None
+    out_dims = (i1.size_text if i1 else "") or _dim_str(dims(o0))
+    many = len(outs) > 1
+
+    def bits(*parts: str) -> str:
+        return " · ".join(p for p in parts if p)
+
+    length = fmt_time(i1.duration) if i1 and i1.duration else ""
+    name_bit = f"{len(outs)} files" if many else o0.name
+    if kind == "convert":
+        title = f"{len(srcs)} videos → {name}" if many else f"{src.suffix.lstrip('.').upper()} → {name}"
+        return Result(title, bits(name_bit, out_dims, length, human_size(after)), outs, srcs)
+    if name == "Compress":
+        sizes, verdict = size_change(before, after)
+        if verdict.endswith("larger") or verdict == "same size":
+            verdict = "already well compressed"
+        res = f"{i0.height}p → {i1.height}p" if i0 and i1 and i0.height != i1.height and not many else ""
+        title = f"Compressed {len(srcs)} videos" if many else "Compressed"
+        return Result(title, bits(sizes, res, extra), outs, srcs, good=verdict)
+    if name == "Trim":
+        span = f"{fmt_time(i0.duration)} → {length}" if i0 and length else length
+        return Result("Trimmed", bits(span, human_size(after), o0.name), outs, srcs)
+    if name == "Resize":
+        change = f"{i0.size_text} → {out_dims}" if i0 and not many else out_dims
+        return Result(f"Resized {len(srcs)} videos" if many else "Resized",
+                      bits(change, human_size(after), name_bit), outs, srcs)
+    if name == "GIF":
+        return Result("GIF created", bits(out_dims, extra, human_size(after), o0.name), outs, srcs)
+    if name == "Mute":
+        return Result("Sound removed", bits(human_size(after), name_bit), outs, srcs)
+    if name == "Frame":
+        return Result("Frame saved", bits(f"{out_dims} PNG", extra, o0.name), outs, srcs)
+    return Result(name or kind, bits(name_bit, human_size(after)), outs, srcs)

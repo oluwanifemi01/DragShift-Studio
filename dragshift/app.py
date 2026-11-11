@@ -14,7 +14,7 @@ from PySide6.QtGui import (QAction, QColor, QCursor, QDesktopServices, QGuiAppli
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication, QFileDialog, QMenu, QSystemTrayIcon, QWidget
 
-from . import __version__, convert, glass, imaging, report, tools
+from . import __version__, convert, glass, imaging, report, tools, tools_video, video
 from .radial import Item, RadialMenu
 from .settings import Settings, SettingsWindow, WelcomeWindow, TRIGGERS
 from .toasts import ToastStack
@@ -31,7 +31,8 @@ IPC_NAME = ipc_name()
 
 GLYPHS = {"Compress": "⇲", "Metadata": "ⓘ", "Redact": "▮", "Crop": "⌗", "Edit": "☼",
           "Annotate": "✎", "Add BG": "▣", "Resize": "⤢", "Split": "✂", "Rotate": "⟳",
-          "Merge": "⧉", "Protect": "⚿", "Extract": "⧈"}
+          "Merge": "⧉", "Protect": "⚿", "Extract": "⧈", "Trim": "✂", "GIF": "∞", "Mute": "⊘",
+          "Frame": "◫"}
 
 HINTS = {
     "Compress": "Shrink file size", "Metadata": "View · remove GPS", "Redact": "Hide private info",
@@ -45,7 +46,15 @@ FORMAT_HINTS = {"JPG": "Small, universal", "PNG": "Lossless · transparency", "W
                 "BMP": "Uncompressed", "PDF": "Document", "ICO": "Windows icon", "GIF": "Legacy web",
                 "DOCX": "Editable Word", "TXT": "Plain text"}
 
+VIDEO_HINTS = {"Compress": "Shrink · fit a size limit", "Resize": "1080p · 720p · 480p",
+               "Trim": "Cut start and end", "GIF": "Loop a short clip", "Mute": "Remove the sound",
+               "Frame": "Save a still image"}
+VIDEO_FORMAT_HINTS = {"MP4": "Plays everywhere", "WEBM": "Open web format", "MOV": "Apple · editing",
+                      "GIF": f"Loop · first {video.GIF_MAX_SECONDS} s", "MP3": "Sound only",
+                      "M4A": "Sound only · smaller"}
+
 IMAGE_TOOLS = ["Compress", "Resize", "Crop", "Edit", "Annotate", "Redact", "Add BG", "Metadata"]
+VIDEO_TOOLS = ["Compress", "Trim", "Resize", "GIF", "Mute", "Frame"]
 PDF_TOOLS = ["Compress", "Split", "Rotate", "Protect", "Extract", "Metadata"]
 
 
@@ -53,6 +62,8 @@ PDF_TOOLS = ["Compress", "Split", "Rotate", "Protect", "Extract", "Metadata"]
 class _Sig(QObject):
     done = Signal(object)
     failed = Signal(str)
+    progress = Signal(float)
+    cancelled = Signal()
 
 
 class Job(QRunnable):
@@ -65,6 +76,8 @@ class Job(QRunnable):
         try:
             outs = self.fn() or []
             self.sig.done.emit(report.summarize(self.action, self.srcs, outs, self.extra))
+        except video.Cancelled:
+            self.sig.cancelled.emit()
         except UserError as e:
             self.sig.failed.emit(str(e))
         except Exception as e:  # noqa: BLE001
@@ -240,13 +253,16 @@ class DragShiftApp(QObject):
         ext = Path(paths[0]).suffix
         same = [p for p in paths if category(p) == cat]
         convert_items = []
-        for t in convert.targets_for(cat, ext):
-            hint = FORMAT_HINTS.get(t, "")
+        targets = video.targets_for(ext) if cat == "video" else convert.targets_for(cat, ext)
+        for t in targets:
+            hint = (VIDEO_FORMAT_HINTS if cat == "video" else FORMAT_HINTS).get(t, "")
             if cat == "image" and t == "PDF" and len(same) > 1:
                 hint = f"{len(same)} images → 1 PDF"
             convert_items.append(Item(t, key=f"convert:{t}", hint=hint))
         rings: dict[str, list[Item]] = {"Convert": convert_items}
-        if cat == "image":
+        if cat == "video":
+            rings["Tools"] = [Item(n, GLYPHS[n], key=f"tool:{n}", hint=VIDEO_HINTS[n]) for n in VIDEO_TOOLS]
+        elif cat == "image":
             rings["Tools"] = [Item(n, GLYPHS[n], key=f"tool:{n}", hint=HINTS[n]) for n in IMAGE_TOOLS]
         elif cat == "pdf":
             names = PDF_TOOLS[:3] + (["Merge"] if len(same) > 1 else []) + PDF_TOOLS[3:]
@@ -258,6 +274,9 @@ class DragShiftApp(QObject):
         cat = category(paths[0])
         paths = [p for p in paths if category(p) == cat]
         kind, name = item.key.split(":", 1)
+        if cat == "video":
+            self.run_video(kind, name, paths)
+            return
         if kind == "convert":
             if cat == "image" and name == "PDF" and len(paths) > 1:
                 self.submit(f"convert:{name}", paths, lambda: convert.images_to_single_pdf(paths),
@@ -297,6 +316,28 @@ class DragShiftApp(QObject):
             traceback.print_exc()
             self.toasts.error(f"Couldn't open {name}", friendly_error(e))
 
+    def run_video(self, kind: str, name: str, paths: list[str]):
+        if kind == "convert":
+            self.submit(f"convert:{name}", paths,
+                        lambda ctl: video.each(paths, ctl, lambda p, c: video.convert(p, name, c)),
+                        f"Converting to {name}…", cancellable=True)
+            return
+        if name == "Mute":
+            self.submit("tool:Mute", paths, lambda ctl: video.each(paths, ctl, video.mute),
+                        "Removing sound…", cancellable=True)
+            return
+        windows = {"Compress": tools_video.CompressVideoWindow, "Resize": tools_video.ResizeVideoWindow,
+                   "Trim": tools_video.TrimWindow, "GIF": tools_video.GifWindow,
+                   "Frame": tools_video.FrameWindow}
+        many = name in ("Compress", "Resize")
+        try:
+            self.open_window(windows[name](paths if many else paths[0], self.notify))
+        except UserError as e:
+            self.toasts.error(f"Couldn't open {name}", str(e))
+        except Exception as e:  # noqa: BLE001
+            traceback.print_exc()
+            self.toasts.error(f"Couldn't open {name}", friendly_error(e))
+
     def open_window(self, w: QWidget):
         if hasattr(w, "submit"):
             w.submit = self.submit
@@ -307,18 +348,44 @@ class DragShiftApp(QObject):
         else:
             w.show()
 
-    def submit(self, action: str, srcs: list, fn, working: str = "Working…", extra: str = ""):
-        """Run in the background. A spinner card appears only if it takes > 150 ms."""
-        state = {"card": None, "finished": False}
+    def submit(self, action: str, srcs: list, fn, working: str = "Working…", extra: str = "",
+               cancellable: bool = False):
+        """Run in the background. A spinner card appears only if it takes > 150 ms.
+        With `cancellable`, `fn` receives a video.Control and the card shows % and Cancel."""
+        ctl = video.Control() if cancellable else None
+        state = {"card": None, "finished": False, "progress": None}
         names = Path(srcs[0]).name if len(srcs) == 1 else f"{len(srcs)} files"
 
         def show_spinner():
             if not state["finished"]:
                 state["card"] = self.toasts.new()
-                state["card"].working(working, names)
+                # closed early by the user: the result gets a fresh card instead of a deleted one
+                state["card"].closed.connect(lambda *_: state.update(card=None))
+                state["card"].working(working, names, on_cancel=ctl.cancel if ctl else None)
+                if state["progress"] is not None:
+                    state["card"].set_progress(state["progress"])
+
+        def on_progress(frac):
+            state["progress"] = frac
+            if state["card"] is not None:
+                try:
+                    state["card"].set_progress(frac)
+                except RuntimeError:   # the user closed the card; the job carries on
+                    state["card"] = None
 
         QTimer.singleShot(150, show_spinner)
-        job = Job(action, srcs, fn, extra)
+        job = Job(action, srcs, (lambda: fn(ctl)) if ctl else fn, extra)
+        if ctl:
+            ctl.on_progress = job.sig.progress.emit   # emitted from the worker, delivered queued
+            job.sig.progress.connect(on_progress)
+
+        def cancelled():
+            release(job)
+            state["finished"] = True
+            card = state["card"] or self.toasts.new()
+            card.info("Cancelled", "Nothing was saved", 2500)
+
+        job.sig.cancelled.connect(cancelled)
 
         def done(r):
             release(job)
@@ -494,6 +561,28 @@ def check_text_renders():
             raise RuntimeError(f"text does not render with font {ui_family(display)!r}")
 
 
+def selftest_video(d: Path) -> None:
+    """Video needs the bundled ffmpeg: make a 1 s clip with it, run each format, open each tool."""
+    import subprocess
+    exe = video.ffmpeg_exe()
+    if getattr(sys, "frozen", False):
+        bundle = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent)).resolve()
+        if bundle not in Path(exe).resolve().parents:
+            raise RuntimeError(f"ffmpeg is not the bundled one: {exe}")
+    clip = d / "v.mp4"
+    subprocess.run([exe, "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=854x480:rate=10",
+                    "-f", "lavfi", "-i", "sine", "-t", "1", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-shortest", str(clip)], check=True, **video._popen_kw())
+    for t in video.targets_for(".mp4"):
+        video.convert(clip, t, video.Control())
+    video.compress(clip, video.Control(), quality="Small")
+    n = lambda *a, **k: None
+    for w in (tools_video.TrimWindow(clip, n), tools_video.GifWindow(clip, n), tools_video.FrameWindow(clip, n),
+              tools_video.CompressVideoWindow([clip], n), tools_video.ResizeVideoWindow([clip], n)):
+        w.close()
+    QThreadPool.globalInstance().waitForDone(10000)   # preview frames still loading
+
+
 def selftest() -> int:
     """Used by CI on the frozen .exe: exercise every library and build the UI, then exit."""
     import tempfile
@@ -525,6 +614,7 @@ def selftest() -> int:
                 w.close()
             ToastStack().info("ok", "ok").dismiss()
             check_text_renders()
+            selftest_video(Path(d))
         print("SELFTEST OK")
         return 0
     except Exception:

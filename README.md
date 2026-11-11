@@ -1,12 +1,34 @@
-# DragShift
+# DragShift (with video)
+
+> **This is an iteration of [DragShift by llamaboi55](https://github.com/llamaboi55/DragShift).** All the original features, the liquid-glass design and the build and test setup come from that project. This fork adds **video support**: convert, compress (including fitting a size limit), trim, resize, make GIFs, remove sound and save frames. See [What's new in this fork](#whats-new-in-this-fork). If you only need images and documents, the [original project](https://github.com/llamaboi55/DragShift) is the place to go.
 
 Convert and edit files on **Windows, Mac and Linux** with a liquid-glass radial menu. Start dragging any file, press **Shift**, and drop it on a slice.
 
 ![DragShift radial menu and Add BG editor](docs/preview.png)
 
+## What's new in this fork
+
+**Video files** (MP4, MOV, MKV, WEBM, AVI, M4V, WMV, FLV, 3GP, MPG, MTS…) now get their own menu, just like images:
+
+- **Convert** to MP4, WEBM, MOV, GIF (the first 20 seconds) or just the sound as **MP3** or **M4A**. MP4 ↔ MOV is instant when the video's codecs allow it, because the video is rewrapped instead of re-encoded.
+- **Compress**, two ways:
+  - *Smaller file*: choose High, Balanced or Small quality.
+  - *Fit a size limit*: 10 MB (Discord), 25 MB (most email), 50 MB, 100 MB (WhatsApp) or a custom size. DragShift works out the bitrate from the video's length, picks a sensible resolution (for example 720p for a one-minute clip under 10 MB), and tries again if the first result comes out over the limit. It tells you up front if a size is too small to be watchable.
+- **Trim**: a big preview over a thumbnail timeline with drag handles. Saving is instant by default (the cut starts on the nearest keyframe); tick *Exact frame* for a frame-accurate cut.
+- **GIF**: pick the part of the video, the frame rate (10–24 fps) and the width (320–800 px). Colours stay clean because DragShift builds a palette for each GIF first.
+- **Resize** to 2160p, 1440p, 1080p, 720p, 540p, 480p or 360p (only sizes smaller than the original are offered).
+- **Mute**: removes the sound without re-encoding the picture.
+- **Frame**: scrub to any moment (← → steps 0.1 s, Shift for 1 s) and save it as a full-size PNG.
+
+Video jobs can take a while, so their notification shows a **percentage** and a **Cancel** button. Cancelling stops at once and leaves no half-written files. Results are saved next to the original, and **Undo** works as it does for images. Phone videos filmed upright, videos with odd pixel sizes and files with cover art are handled.
+
+**Under the hood:** the video work uses [ffmpeg](https://ffmpeg.org), bundled through the [`imageio-ffmpeg`](https://github.com/imageio/imageio-ffmpeg) package, so there's nothing extra to install (it adds roughly 50 MB to the app). The built-in `--selftest` that CI runs on every build now checks that the bundled ffmpeg is present and that every video format and tool works. There are new unit and UI tests in `tests/test_video.py` and `tests/test_video_ui.py`.
+
 ## Download
 
-From the [latest release](../../releases/latest):
+> **Note:** this fork hasn't published its own release yet. The downloads and the Mac install line below come from the [original project's releases](https://github.com/llamaboi55/DragShift/releases/latest) and **don't include video support**. To use video today, [run from source](#run-from-source).
+
+From the [latest release of the original project](https://github.com/llamaboi55/DragShift/releases/latest):
 
 - **DragShift-Setup.exe** (recommended): installs for your user only, so no admin rights are needed. It adds a Start menu entry, an option to start with Windows, a right-click **DragShift…** entry and a **Send to → DragShift** entry. It uninstalls cleanly from Settings → Apps.
 - **DragShift.exe**: a portable version you can run from anywhere.
@@ -17,7 +39,7 @@ From the [latest release](../../releases/latest):
 curl -fsSL https://raw.githubusercontent.com/llamaboi55/DragShift/main/install-mac.sh | bash
 ```
 
-It picks the right build for your Mac, installs it to Applications and opens it ([see what it does](install-mac.sh)). Run the same line again to update.
+It picks the right build for your Mac (from the original project), installs it to Applications and opens it ([see what it does](install-mac.sh)). Run the same line again to update.
 
 Or download the .dmg yourself:
 - **DragShift-mac-apple-silicon.dmg**: for Macs with M1, M2, M3 or M4 chips (macOS 11 or later).
@@ -49,10 +71,12 @@ Open **DragShift** from the app menu. It sits in the panel's notification area, 
 
 ## How to use
 
-1. Start dragging a file (an image, PDF, Word or text file; desktop shortcuts to one work too) in File Explorer, Finder, your Linux file manager or on the desktop.
+1. Start dragging a file (an image, video, PDF, Word or text file; desktop shortcuts to one work too) in File Explorer, Finder, your Linux file manager or on the desktop.
 2. Press **Shift**. The menu opens under your cursor.
 3. Drop the file on a slice. The result is saved **next to the original**, and the original is never changed.
 4. To switch between **Convert** and **Tools**, tap **Shift** again.
+
+Video jobs show a progress percentage and a **Cancel** button while they run.
 
 Each action ends with a notification that shows what changed, for example *"2.4 MB → 610 KB · 75% smaller"* or *"2400×1600 → 1200×800"*, with **Open**, **Show in folder** and **Undo**. Undo moves the new file to the Recycle Bin (Trash on Mac and Linux).
 
@@ -66,6 +90,7 @@ You can also right-click a file → **DragShift…**, use **Send to → DragShif
 | PDF | JPG or PNG (one per page), DOCX, TXT | Compress · Split · Rotate · Merge (drop several) · **Protect** (AES-256 password) · **Extract images** · Metadata |
 | Word (.docx) | PDF (uses Microsoft Word if it's installed, otherwise a built-in renderer), TXT | — |
 | Text (.txt, .md, .csv…) | PDF, DOCX | — |
+| Video (MP4, MOV, MKV, WEBM, AVI, M4V…) | MP4, WEBM, MOV, **GIF** (first 20 s), **MP3** / **M4A** (just the sound). MP4 ↔ MOV is instant when the codecs allow | **Compress** (by quality, or to fit a size limit such as 10 MB for Discord or 25 MB for email; picks a sensible resolution) · **Trim** (thumbnail timeline with handles; instant, or exact-frame) · **Resize** (1080p, 720p, 480p…) · **GIF** (pick the clip, frame rate and width) · **Mute** · **Frame** (save a still as PNG) |
 
 **Settings** (tray menu): trigger key (Shift, Ctrl or Alt), where results go (next to the original or a `DragShift` subfolder), JPG/WebP quality, PDF → image resolution, and start at login.
 
@@ -86,20 +111,31 @@ Every push runs these jobs on GitHub's Windows, Mac and Linux machines:
 
 ## Support
 
-DragShift is free. If it saves you time, you can leave a tip on Cash App: [**$AtikaKadesha**](https://cash.app/$AtikaKadesha). Thank you!
+DragShift is free. To support the original author, who created DragShift, you can leave a tip on Cash App: [**$AtikaKadesha**](https://cash.app/$AtikaKadesha). Thank you!
 
 <img src="docs/tip-cashapp.png" alt="Cash App QR code for $AtikaKadesha" width="220">
 
-## License
+## Credits and license
 
-[MIT](LICENSE): free to use, modify and share.
+DragShift was created by [llamaboi55](https://github.com/llamaboi55/DragShift). This fork builds on their work and adds video support.
+
+[MIT](LICENSE): free to use, modify and share. The original copyright notice is kept, and the video additions are released under the same license.
 
 ## Run from source
 
 ```bash
-pip install -r requirements.txt
-python -m dragshift
+git clone https://github.com/oluwanifemi01/DragShift.git
+cd DragShift
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m dragshift
 ```
+
+On Windows, use `py -m venv .venv`, then `.venv\Scripts\pip` and `.venv\Scripts\python` in place of the `.venv/bin/…` commands.
+
+If the installed DragShift is already running, quit it first: only one copy runs at a time, and a second one hands its files to the copy that's already open.
+
+Video uses the ffmpeg that comes with the `imageio-ffmpeg` package (bundled into the app builds). To use your own build instead, set `DRAGSHIFT_FFMPEG=/path/to/ffmpeg`.
 
 On Linux, PySide6 also needs the Qt XCB libraries: `sudo apt install libxcb-cursor0 libxkbcommon-x11-0`.
 

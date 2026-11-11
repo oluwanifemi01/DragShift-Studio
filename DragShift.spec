@@ -5,11 +5,18 @@ from PyInstaller.utils.hooks import collect_all
 onefile = os.environ.get("ONEFILE") == "1"
 heif_datas, heif_bins, heif_hidden = collect_all("pillow_heif")
 
+# ffmpeg for video: imageio-ffmpeg ships one static binary per platform. Collect it as a
+# binary (not data) so it stays executable and the Mac signing step signs it.
+import glob
+import imageio_ffmpeg
+_ff_dir = os.path.join(os.path.dirname(imageio_ffmpeg.__file__), "binaries")
+ffmpeg_bins = [(f, "imageio_ffmpeg/binaries") for f in glob.glob(os.path.join(_ff_dir, "ffmpeg*"))]
+
 a = Analysis(
     ["run.py"],
     datas=[("dragshift/assets", "dragshift/assets")] + heif_datas,
-    binaries=heif_bins,
-    hiddenimports=["win32com.client", "PySide6.QtNetwork", "AppKit", "Quartz", "objc"] + heif_hidden,
+    binaries=heif_bins + ffmpeg_bins,
+    hiddenimports=["win32com.client", "PySide6.QtNetwork", "AppKit", "Quartz", "objc", "imageio_ffmpeg"] + heif_hidden,
     excludes=["tkinter", "PySide6.QtWebEngineCore", "PySide6.QtWebEngineWidgets", "PySide6.QtQml",
               "PySide6.QtQuick", "PySide6.Qt3DCore", "PySide6.QtMultimedia", "PySide6.QtCharts",
               "PySide6.QtDataVisualization", "PySide6.QtPdf", "pandas", "yaml", "PySide6.QtSql", "PySide6.QtTest",
