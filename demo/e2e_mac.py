@@ -106,6 +106,15 @@ def petal_xy(c, n, i, r=R_PETAL):
     return int(c[0] + r * math.cos(a)), int(c[1] - r * math.sin(a))
 
 
+def type_text(text):
+    for ch in text:
+        for down in (True, False):
+            ev = Quartz.CGEventCreateKeyboardEvent(None, 0, down)
+            Quartz.CGEventKeyboardSetUnicodeString(ev, len(ch), ch)
+            Quartz.CGEventPost(Quartz.kCGHIDEventTap, ev)
+            time.sleep(0.02)
+
+
 def press_enter():
     post_key(36, True)
     time.sleep(0.05)
@@ -307,9 +316,12 @@ def run(name, files, ring, label, verify, after_drop=None, multi=False):
     time.sleep(0.5)
 
 
-def enter_after(delay=2.0):
+def enter_after(delay=2.0, text=None):
     def f():
         time.sleep(delay)   # window opens on its preview
+        if text:
+            type_text(text)
+            time.sleep(0.2)
         press_enter()
     return f
 
@@ -398,7 +410,8 @@ def main():
         run("PDF → JPG (3 pages)", ["D-Report.pdf"], "Convert", "JPG", v_pages_to_images(3, ".jpg"))
         run("PDF → TXT", ["D-Report.pdf"], "Convert", "TXT", v_format("TXT", ".txt"))
         run("DOCX → PDF", ["D-Letter.docx"], "Convert", "PDF", v_format("PDF", ".pdf"))
-        run("PDF Split", ["D-Report.pdf"], "Tools", "Split", v_pdf_n(3))
+        run("PDF Split 1, 2-3 (window)", ["D-Report.pdf"], "Tools", "Split", v_pdf_n(2),
+            enter_after(text="1, 2-3"))
         run("PDF Rotate", ["D-Report.pdf"], "Tools", "Rotate", v_rotated)
         run("PDF Compress", ["D-Report.pdf"], "Tools", "Compress", v_pdf_compress)
         run("Merge 2 PDFs", ["D-Appendix.pdf", "D-Report.pdf"], "Tools", "Merge", v_merged, multi=True)

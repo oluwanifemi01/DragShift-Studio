@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, Signal
+from PySide6.QtCore import QObject, QRunnable, QSize, Qt, QThreadPool, QTimer, Signal
 from PySide6.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QLabel, QLineEdit, QListView,
                                QListWidget, QListWidgetItem, QSpinBox, QVBoxLayout, QWidget)
@@ -100,6 +100,7 @@ class SplitWindow(ToolWindow):
         self.grid.itemSelectionChanged.connect(self._clicked)
         self._update()
         self._load_thumbs(0)
+        QTimer.singleShot(0, self.ranges.setFocus)
 
     # ---- layout
     def _build_pick(self):

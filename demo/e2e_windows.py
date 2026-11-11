@@ -334,6 +334,17 @@ def drive_meta_all():
     wk.click_title(w, "Remove all metadata")
 
 
+def drive_split():
+    w = tool_win("Split PDF.*")
+    time.sleep(0.6)                 # the pages box has focus when the window opens
+    pyautogui.typewrite("1, 2-3", interval=0.03)
+    time.sleep(0.3)
+    btns = [b for b in w.descendants(control_type="Button") if b.window_text() == "Split"]
+    r = btns[-1].rectangle()
+    wk.glide((r.left + r.right) // 2, (r.top + r.bottom) // 2)
+    pyautogui.click()
+
+
 def drive_protect():
     w = tool_win("Password-protect.*")
     time.sleep(0.4)
@@ -570,7 +581,7 @@ def main():
         run("Metadata: remove all", "explorer", ["Photo.jpg"], "Tools", "Metadata", v_no_meta, drive_meta_all)
         # ---- PDF tools
         run("PDF Compress", "explorer", ["Report.pdf"], "Tools", "Compress", v_pdf_compress)
-        run("PDF Split", "explorer", ["Report.pdf"], "Tools", "Split", v_pdf_n(3))
+        run("PDF Split 1, 2-3", "explorer", ["Report.pdf"], "Tools", "Split", v_pdf_n(2), drive_split)
         run("PDF Rotate", "explorer", ["Report.pdf"], "Tools", "Rotate", v_rotated)
         run("PDF Protect", "explorer", ["Report.pdf"], "Tools", "Protect", v_protected, drive_protect)
         run("PDF Extract images", "explorer", ["Report.pdf"], "Tools", "Extract", v_extract)

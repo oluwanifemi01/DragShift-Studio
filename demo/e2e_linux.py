@@ -365,7 +365,8 @@ def main():
         run("PDF → TXT", ["D-Report.pdf"], "Convert", "TXT", v_format("TXT", ".txt"))
         run("DOCX → PDF", ["D-Letter.docx"], "Convert", "PDF", v_format("PDF", ".pdf"))
         run("TXT → PDF", ["D-Notes.txt"], "Convert", "PDF", v_format("PDF", ".pdf"))
-        run("PDF Split", ["D-Report.pdf"], "Tools", "Split", v_pdf_n(3))
+        run("PDF Split 1, 2-3 (window)", ["D-Report.pdf"], "Tools", "Split", v_pdf_n(2),
+            enter_after(text="1, 2-3"))
         run("PDF Rotate", ["D-Report.pdf"], "Tools", "Rotate", v_rotated)
         run("PDF Compress", ["D-Report.pdf"], "Tools", "Compress", v_pdf_compress)
         run("Merge 2 PDFs", ["D-Appendix.pdf", "D-Report.pdf"], "Tools", "Merge", v_merged)
