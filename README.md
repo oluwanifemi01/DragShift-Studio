@@ -40,10 +40,27 @@ Video jobs show a **percentage** and a **Cancel** button. Cancelling stops at on
 
 ## Download
 
-From the [latest release](https://github.com/oluwanifemi01/DragShift-Studio/releases/latest):
+All downloads are on the [latest release](https://github.com/oluwanifemi01/DragShift-Studio/releases/latest) page, under **Assets**.
 
-- **DragShift-Setup.exe** (recommended): installs for your user only, so no admin rights are needed. It adds a Start menu entry, an option to start with Windows, a right-click **DragShift…** entry and a **Send to → DragShift** entry. It uninstalls cleanly from Settings → Apps.
-- **DragShift.exe**: a portable version you can run from anywhere.
+### Windows (10 and 11)
+
+1. On the [latest release](https://github.com/oluwanifemi01/DragShift-Studio/releases/latest) page, click **DragShift-Setup.exe** under **Assets**.
+2. Open the downloaded file. It installs for your user only, so no admin password is needed.
+3. Windows SmartScreen will probably say *"Windows protected your PC"*, because the app isn't code-signed yet. Click **More info**, then **Run anyway**.
+4. Follow the installer. You get a Start menu entry, an option to start DragShift with Windows, a right-click **DragShift…** entry and a **Send to → DragShift** entry.
+5. DragShift sits in the system tray (bottom right, near the clock; it may be under the **^** arrow). Drag a file in File Explorer or on the desktop, press **Shift**, and drop it on a slice.
+
+Or download and start the installer from PowerShell:
+
+```powershell
+Invoke-WebRequest https://github.com/oluwanifemi01/DragShift-Studio/releases/latest/download/DragShift-Setup.exe -OutFile "$env:TEMP\DragShift-Setup.exe"; Start-Process "$env:TEMP\DragShift-Setup.exe"
+```
+
+**No install:** download **DragShift.exe** instead and run it from anywhere, such as a USB stick (the same SmartScreen steps apply). You won't get the Start menu or right-click entries.
+
+**To uninstall:** Settings → Apps → DragShift.
+
+### Mac and Linux
 
 **Mac (easiest, no security warning):** paste this into Terminal:
 
@@ -69,8 +86,6 @@ Open **DragShift** from the app menu. It sits in the panel's notification area, 
 
 > **Wayland:** Wayland doesn't let apps read the global Shift and mouse state, so the Shift + drag trigger only works in X11 sessions (XFCE is X11). On GNOME/KDE Wayland, use right-click → **Open With → DragShift**, or pick *"Ubuntu on Xorg"* / *"Plasma (X11)"* at the login screen.
 
-> **First launch on Windows:** SmartScreen may warn because the app isn't code-signed yet. Click **More info → Run anyway**.
->
 > **First launch on Mac, if you used the .dmg instead of the Terminal line:** macOS says *"Apple could not verify 'DragShift' is free of malware."* This happens with any app that hasn't paid for Apple's notarization; DragShift's code is all public in this repo. To open it:
 > 1. Open DragShift once and click **Done** on the warning.
 > 2. Go to  → **System Settings → Privacy & Security**, scroll down to *"DragShift was blocked…"* and click **Open Anyway**. Enter your password and confirm.
