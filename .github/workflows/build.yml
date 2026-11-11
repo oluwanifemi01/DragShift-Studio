@@ -15,6 +15,8 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
+    env:
+      HAS_SIGNPATH: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -95,6 +97,7 @@ jobs:
       # request is submitted and awaited, then the unsigned artifact is deleted
       # again so the release keeps publishing exactly what it published before.
       - name: Upload unsigned artifact for SignPath
+        if: env.HAS_SIGNPATH == 'true'
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
@@ -104,6 +107,7 @@ jobs:
             dist/DragShift-Setup.exe
 
       - name: Submit test signing request to SignPath
+        if: env.HAS_SIGNPATH == 'true'
         uses: signpath/github-action-submit-signing-request@v3
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
@@ -341,7 +345,7 @@ jobs:
             - **DragShift.exe** — portable.
 
             **Mac** (macOS 11+). Easiest, with no security warning, is to paste into Terminal:
-            `curl -fsSL https://raw.githubusercontent.com/llamaboi55/DragShift/main/install-mac.sh | bash`
+            `curl -fsSL https://raw.githubusercontent.com/oluwanifemi01/DragShift-Studio/main/install-mac.sh | bash`
 
             Or download:
             - **DragShift-mac-apple-silicon.dmg** — M1/M2/M3/M4 Macs.
@@ -352,8 +356,6 @@ jobs:
 
             **Linux** (Debian 12+, Ubuntu 23.04+, Mint, MX… on X11 desktops such as XFCE, MATE, Cinnamon):
             - **DragShift-linux-amd64.deb** — install with `sudo apt install ./DragShift-linux-amd64.deb`, then open DragShift from the app menu. Works with or without a compositor.
-
-            Enjoying DragShift? Tips are welcome: [Cash App $AtikaKadesha](https://cash.app/$AtikaKadesha) ♥
 
             Built automatically from commit ${{ github.sha }}.
           files: out/*

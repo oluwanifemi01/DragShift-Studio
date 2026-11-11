@@ -1,34 +1,46 @@
-# DragShift (with video)
+# DragShift Studio
 
-> **This is an iteration of [DragShift by llamaboi55](https://github.com/llamaboi55/DragShift).** All the original features, the liquid-glass design and the build and test setup come from that project. This fork adds **video support**: convert, compress (including fitting a size limit), trim, resize, make GIFs, remove sound and save frames. See [What's new in this fork](#whats-new-in-this-fork). If you only need images and documents, the [original project](https://github.com/llamaboi55/DragShift) is the place to go.
+Convert and edit images, **videos**, PDFs and documents on **Windows, Mac and Linux** from a liquid-glass radial menu. Start dragging any file, press **Shift**, and drop it on a slice.
 
-Convert and edit files on **Windows, Mac and Linux** with a liquid-glass radial menu. Start dragging any file, press **Shift**, and drop it on a slice.
+DragShift Studio builds on [DragShift](https://github.com/llamaboi55/DragShift) by llamaboi55 and adds video tools and page-range PDF splitting. See [Credits](#credits-and-license).
 
 ![DragShift radial menu and Add BG editor](docs/preview.png)
 
-## What's new in this fork
+## Why DragShift Studio
 
-**Video files** (MP4, MOV, MKV, WEBM, AVI, M4V, WMV, FLV, 3GP, MPG, MTS…) now get their own menu, just like images:
+Most people who need to compress a video, split a PDF or blur out an address end up on a free website: they upload the file, wait, and download the result. For anything sensitive (ID scans, contracts, bank statements, medical letters, private photos and videos) that means handing a copy to a stranger's server, with no real way to know how long it's kept or who sees it.
+
+DragShift Studio is meant to be the safer habit: **everything happens on your own computer**.
+
+- **Your files are never uploaded.** Every conversion and edit, video included, runs locally; ffmpeg ships inside the app. There's no account, no cloud service and no analytics.
+- **Originals are never changed.** Results are saved next to the original as new files, and Undo moves them to the Trash.
+- **Privacy tools built in:** **Redact** burns black boxes into the pixels (not a removable layer), **Metadata** shows and strips camera details and GPS location from photos and author details from PDFs, and **Protect** adds an AES-256 password to a PDF.
+- **Open source:** all the code is in this repository, so anyone can check what it does.
+
+The only time the app touches the internet is when you click a link yourself. For example, the **Metadata** tool's map button opens the photo's GPS location on OpenStreetMap in your browser, and that sends those coordinates to OpenStreetMap.
+
+## Highlights
+
+**Video** (MP4, MOV, MKV, WEBM, AVI, M4V, WMV, FLV, 3GP, MPG, MTS…):
 
 - **Convert** to MP4, WEBM, MOV, GIF (the first 20 seconds) or just the sound as **MP3** or **M4A**. MP4 ↔ MOV is instant when the video's codecs allow it, because the video is rewrapped instead of re-encoded.
 - **Compress**, two ways:
   - *Smaller file*: choose High, Balanced or Small quality.
-  - *Fit a size limit*: 10 MB (Discord), 25 MB (most email), 50 MB, 100 MB (WhatsApp) or a custom size. DragShift works out the bitrate from the video's length, picks a sensible resolution (for example 720p for a one-minute clip under 10 MB), and tries again if the first result comes out over the limit. It tells you up front if a size is too small to be watchable.
+  - *Fit a size limit*: 10 MB (Discord), 25 MB (most email), 50 MB, 100 MB (WhatsApp) or a custom size. The bitrate is worked out from the video's length, a sensible resolution is picked (for example 720p for a one-minute clip under 10 MB), and it tries again if the first result comes out over the limit. You're told up front if a size is too small to be watchable.
 - **Trim**: a big preview over a thumbnail timeline with drag handles. Saving is instant by default (the cut starts on the nearest keyframe); tick *Exact frame* for a frame-accurate cut.
-- **GIF**: pick the part of the video, the frame rate (10–24 fps) and the width (320–800 px). Colours stay clean because DragShift builds a palette for each GIF first.
+- **GIF**: pick the part of the video, the frame rate (10–24 fps) and the width (320–800 px), with a palette built for each GIF so colours stay clean.
 - **Resize** to 2160p, 1440p, 1080p, 720p, 540p, 480p or 360p (only sizes smaller than the original are offered).
-- **Mute**: removes the sound without re-encoding the picture.
-- **Frame**: scrub to any moment (← → steps 0.1 s, Shift for 1 s) and save it as a full-size PNG.
+- **Mute** removes the sound without re-encoding the picture. **Frame** saves any moment as a full-size PNG (← → step 0.1 s, Shift for 1 s).
 
-Video jobs can take a while, so their notification shows a **percentage** and a **Cancel** button. Cancelling stops at once and leaves no half-written files. Results are saved next to the original, and **Undo** works as it does for images. Phone videos filmed upright, videos with odd pixel sizes and files with cover art are handled.
+Video jobs show a **percentage** and a **Cancel** button. Cancelling stops at once and leaves no half-written files.
 
-**Under the hood:** the video work uses [ffmpeg](https://ffmpeg.org), bundled through the [`imageio-ffmpeg`](https://github.com/imageio/imageio-ffmpeg) package, so there's nothing extra to install (it adds roughly 50 MB to the app). The built-in `--selftest` that CI runs on every build now checks that the bundled ffmpeg is present and that every video format and tool works. There are new unit and UI tests in `tests/test_video.py` and `tests/test_video_ui.py`.
+**PDF Split, your way:** click page thumbnails or type ranges like `1-3, 7, 10-` (`10-` means page 10 to the end). Save one PDF per range, or all the chosen pages in one PDF in the order you typed. You can also split every N pages, or into single pages.
+
+**Plus everything from DragShift:** image compress, resize, crop, edit, annotate, redact, backgrounds and metadata; PDF compress, rotate, merge, password-protect and image extraction; conversions between image, PDF, Word and text formats. See [What it does](#what-it-does).
 
 ## Download
 
-> **Note:** this fork hasn't published its own release yet. The downloads and the Mac install line below come from the [original project's releases](https://github.com/llamaboi55/DragShift/releases/latest) and **don't include video support**. To use video today, [run from source](#run-from-source).
-
-From the [latest release of the original project](https://github.com/llamaboi55/DragShift/releases/latest):
+From the [latest release](https://github.com/oluwanifemi01/DragShift-Studio/releases/latest):
 
 - **DragShift-Setup.exe** (recommended): installs for your user only, so no admin rights are needed. It adds a Start menu entry, an option to start with Windows, a right-click **DragShift…** entry and a **Send to → DragShift** entry. It uninstalls cleanly from Settings → Apps.
 - **DragShift.exe**: a portable version you can run from anywhere.
@@ -36,10 +48,10 @@ From the [latest release of the original project](https://github.com/llamaboi55/
 **Mac (easiest, no security warning):** paste this into Terminal:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/llamaboi55/DragShift/main/install-mac.sh | bash
+curl -fsSL https://raw.githubusercontent.com/oluwanifemi01/DragShift-Studio/main/install-mac.sh | bash
 ```
 
-It picks the right build for your Mac (from the original project), installs it to Applications and opens it ([see what it does](install-mac.sh)). Run the same line again to update.
+It picks the right build for your Mac, installs it to Applications and opens it ([see what it does](install-mac.sh)). Run the same line again to update.
 
 Or download the .dmg yourself:
 - **DragShift-mac-apple-silicon.dmg**: for Macs with M1, M2, M3 or M4 chips (macOS 11 or later).
@@ -109,23 +121,19 @@ Every push runs these jobs on GitHub's Windows, Mac and Linux machines:
 - **Debian/XFCE:** builds the .deb on Debian 12, installs it, and runs the same kind of end-to-end test in Thunar under XFCE's window manager with the compositor **off**. Real XTest drags with Shift go through conversions, PDF tools, merging, the tool windows and Open With. The results and a recording are saved to the `e2e-linux-output` branch.
 - **Demo video:** pushing to the `demo` branch records a showcase video.
 
-## Support
-
-DragShift is free. To support the original author, who created DragShift, you can leave a tip on Cash App: [**$AtikaKadesha**](https://cash.app/$AtikaKadesha). Thank you!
-
-<img src="docs/tip-cashapp.png" alt="Cash App QR code for $AtikaKadesha" width="220">
-
 ## Credits and license
 
-DragShift was created by [llamaboi55](https://github.com/llamaboi55/DragShift). This fork builds on their work and adds video support.
+DragShift Studio is based on **[DragShift](https://github.com/llamaboi55/DragShift)**, created by **llamaboi55**. The radial menu, the liquid-glass rendering, the image, PDF and document tools, and the cross-platform build and test setup all come from that project. Thank you for making it open source.
 
-[MIT](LICENSE): free to use, modify and share. The original copyright notice is kept, and the video additions are released under the same license.
+What DragShift Studio adds: the video tools (with bundled [ffmpeg](https://ffmpeg.org) through [`imageio-ffmpeg`](https://github.com/imageio/imageio-ffmpeg)), progress and cancel for long jobs, and page-range PDF splitting.
+
+[MIT](LICENSE): free to use, modify and share. The original copyright notice is kept in the license.
 
 ## Run from source
 
 ```bash
-git clone https://github.com/oluwanifemi01/DragShift.git
-cd DragShift
+git clone https://github.com/oluwanifemi01/DragShift-Studio.git
+cd DragShift-Studio
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m dragshift
@@ -141,4 +149,3 @@ On Linux, PySide6 also needs the Qt XCB libraries: `sudo apt install libxcb-curs
 
 Tests: `python -m pytest -q`. Logs are written to `%LOCALAPPDATA%\DragShift\log.txt` on Windows, `~/Library/Logs/DragShift/log.txt` on Mac and `~/.local/share/DragShift/log.txt` on Linux.
 
-Windows builds will be code-signed by the SignPath Foundation, which provides free code signing for open-source projects.
