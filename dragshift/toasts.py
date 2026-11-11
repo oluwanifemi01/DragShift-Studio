@@ -84,6 +84,8 @@ class ToastCard(QWidget):
         self.result: Result | None = None
         self.thumb: QPixmap | None = None
         self.spin = 0.0
+        self.progress: float | None = None
+        self.on_cancel = None
         self.hover_btn = -1
         self.buttons: list[tuple[str, QRectF]] = []
         self._fade = 0.0
@@ -97,10 +99,17 @@ class ToastCard(QWidget):
         self.life = QTimer(self, singleShot=True, timeout=self.dismiss)
 
     # ------------------------------------------------------------ state
-    def working(self, title: str, detail: str = ""):
+    def working(self, title: str, detail: str = "", on_cancel=None):
         self.state, self.title, self.detail = "working", title, detail
+        self.on_cancel = on_cancel
         self.spinner.start()
         self.update()
+
+    def set_progress(self, frac: float):
+        """Switch the spinner to a filling ring with a percentage (long jobs such as video)."""
+        if self.state == "working":
+            self.progress = max(0.0, min(1.0, frac))
+            self.update()
 
     def done(self, r: Result):
         self.spinner.stop()
@@ -196,6 +205,13 @@ class ToastCard(QWidget):
             self.dismiss()
 
     def _act(self, name: str):
+        if name == "Cancel":
+            if self.on_cancel and self.state == "working":
+                self.on_cancel()
+                self.on_cancel = None
+                self.title = "Cancelling…"
+                self.update()
+            return
         r = self.result
         if not r:
             return
@@ -233,10 +249,21 @@ class ToastCard(QWidget):
         # leading visual: spinner / thumbnail / icon
         lead = QRectF(14, (H - 56) / 2 - 8, 56, 56)
         if self.state == "working":
+            c = lead.center()
+            ring = QRectF(c.x() - 16, c.y() - 16, 32, 32)
             p.setPen(QPen(QColor(255, 255, 255, 50), 4))
-            p.drawEllipse(lead.center(), 16, 16)
-            p.setPen(glass.iridescent_pen(lead.center(), 4, 255, angle=-self.spin))
-            p.drawArc(QRectF(lead.center().x() - 16, lead.center().y() - 16, 32, 32), int(-self.spin * 16), 100 * 16)
+            p.drawEllipse(c, 16, 16)
+            p.setPen(glass.iridescent_pen(c, 4, 255, angle=-self.spin))
+            if self.progress is None:
+                p.drawArc(ring, int(-self.spin * 16), 100 * 16)
+            else:   # determinate: fill clockwise from 12 o'clock, percentage in the middle
+                p.drawArc(ring, 90 * 16, int(-360 * 16 * max(self.progress, 0.02)))
+                fp = QFont(ui_family(False))
+                fp.setPixelSize(10)
+                fp.setBold(True)
+                p.setFont(fp)
+                p.setPen(QColor(255, 255, 255))
+                p.drawText(ring, Qt.AlignCenter, f"{int(self.progress * 100)}%")
             x = 82
         elif self.thumb is not None:
             clip = QPainterPath()
@@ -302,9 +329,13 @@ class ToastCard(QWidget):
 
         # action buttons
         self.buttons = []
+        names: list[str] = []
         if self.state == "done" and self.result and self.result.outs:
             names = ["Open", "Show", "Undo"]
-            labels = {"Open": "Open", "Show": "Show in folder", "Undo": "Undo"}
+        elif self.state == "working" and self.on_cancel:
+            names = ["Cancel"]
+        if names:
+            labels = {"Open": "Open", "Show": "Show in folder", "Undo": "Undo", "Cancel": "Cancel"}
             f.setPixelSize(12)
             f.setBold(True)
             p.setFont(f)
