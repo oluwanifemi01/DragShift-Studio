@@ -125,6 +125,10 @@ def summarize(action: str, srcs: list, outs: list, extra: str = "") -> Result:
                       good="private copy")
 
     if name == "Split":
+        if len(outs) == 1:   # chosen pages saved together
+            n = pages(o0)
+            return Result(f"Extracted {n} page{'s' if n != 1 else ''}", f"{o0.name} · {human_size(after)}",
+                          outs, srcs)
         return Result(f"Split into {len(outs)} PDFs", f"{o0.name} …", outs, srcs)
 
     if name == "Merge":

@@ -18,6 +18,7 @@ from . import __version__, convert, glass, imaging, report, tools
 from .radial import Item, RadialMenu
 from .settings import Settings, SettingsWindow, WelcomeWindow, TRIGGERS
 from .toasts import ToastStack
+from .tools_pdf import SplitWindow
 from .trigger import DragShiftWatcher
 from .util import UserError, category, file_size, human_size, keep, release
 
@@ -36,7 +37,7 @@ GLYPHS = {"Compress": "⇲", "Metadata": "ⓘ", "Redact": "▮", "Crop": "⌗", 
 HINTS = {
     "Compress": "Shrink file size", "Metadata": "View · remove GPS", "Redact": "Hide private info",
     "Crop": "Trim to a ratio", "Edit": "Light · colour · rotate", "Annotate": "Arrows · text · steps",
-    "Add BG": "Gradient backdrop", "Resize": "Change dimensions", "Split": "One PDF per page",
+    "Add BG": "Gradient backdrop", "Resize": "Change dimensions", "Split": "Pick pages · ranges",
     "Rotate": "Turn pages 90°", "Merge": "Join into one PDF", "Protect": "Add a password",
     "Extract": "Save embedded images",
 }
@@ -274,6 +275,11 @@ class DragShiftApp(QObject):
                 self.open_window(tools.MetadataWindow(paths[0], self.notify, is_pdf=True))
             elif name == "Protect":
                 self.open_window(tools.ProtectWindow(paths[0], self.notify))
+            elif name == "Split" and len(paths) == 1:
+                try:
+                    self.open_window(SplitWindow(paths[0], self.notify))
+                except UserError as e:
+                    self.toasts.error("Couldn't open Split", str(e))
             else:
                 fns = {"Compress": lambda p: [imaging.compress_pdf(p)], "Split": imaging.split_pdf,
                        "Rotate": lambda p: [imaging.rotate_pdf(p)], "Extract": imaging.extract_pdf_images}
@@ -521,7 +527,8 @@ def selftest() -> int:
             for w in (tools.CropWindow(str(src), n), tools.AddBgWindow(str(src), n), tools.EditWindow(str(src), n),
                       tools.AnnotateWindow(str(src), n), tools.RedactWindow(str(src), n),
                       tools.MetadataWindow(str(src), n), tools.CompressWindow([str(src)], n),
-                      tools.ResizeWindow([str(src)], n), tools.ProtectWindow(str(pdf), n)):
+                      tools.ResizeWindow([str(src)], n), tools.ProtectWindow(str(pdf), n),
+                      SplitWindow(str(pdf), n)):
                 w.close()
             ToastStack().info("ok", "ok").dismiss()
             check_text_renders()
