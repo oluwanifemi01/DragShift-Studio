@@ -131,8 +131,8 @@ def test_resize_window_refuses_tiny_video(qapp, tmp_path):
 
 
 def test_audio_only_file_is_refused(qapp, tmp_path, clip):
-    mp3 = video.convert(clip, "M4A", video.Control())[0]
-    renamed = mp3.with_suffix(".mp4")
-    mp3.rename(renamed)
+    m4a = video.convert(clip, "M4A", video.Control())[0]
+    renamed = m4a.with_name("Sound only.mp4")   # a new name: Windows won't rename over Clip.mp4
+    m4a.rename(renamed)
     with pytest.raises(UserError, match="no picture"):
         tools_video.TrimWindow(renamed, Notes())
