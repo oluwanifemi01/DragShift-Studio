@@ -467,6 +467,7 @@ def mac_setup(qapp):
     try:
         from . import platform_mac
         platform_mac.become_accessory()
+        platform_mac.remember_drag_pasteboard()   # ignore a drag left over from before start
     except Exception:
         pass
 
