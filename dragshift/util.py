@@ -9,6 +9,8 @@ IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif", ".tif", ".tiff
 PDF_EXTS = {".pdf"}
 DOCX_EXTS = {".docx"}
 TEXT_EXTS = {".txt", ".md", ".csv", ".log", ".json", ".xml", ".html", ".htm"}
+AUDIO_EXTS = {".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg", ".oga", ".opus", ".wma", ".aiff",
+              ".aif", ".caf", ".alac"}
 VIDEO_EXTS = {".mp4", ".m4v", ".mov", ".mkv", ".webm", ".avi", ".wmv", ".flv", ".3gp", ".mpg",
               ".mpeg", ".mts", ".m2ts"}  # not .ts: usually TypeScript
 
@@ -25,6 +27,8 @@ def category(path: str | Path) -> str | None:
         return "text"
     if ext in VIDEO_EXTS:
         return "video"
+    if ext in AUDIO_EXTS:
+        return "audio"
     return None
 
 

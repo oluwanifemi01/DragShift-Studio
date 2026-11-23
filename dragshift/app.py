@@ -18,6 +18,7 @@ from . import __version__, convert, glass, imaging, report, tools, tools_video, 
 from .radial import Item, RadialMenu
 from .settings import Settings, SettingsWindow, WelcomeWindow, TRIGGERS
 from .toasts import ToastStack
+from . import audio, tools_audio
 from .tools_pdf import SplitWindow
 from .trigger import DragShiftWatcher
 from .util import UserError, category, file_size, human_size, keep, release
@@ -32,7 +33,7 @@ IPC_NAME = ipc_name()
 GLYPHS = {"Compress": "⇲", "Metadata": "ⓘ", "Redact": "▮", "Crop": "⌗", "Edit": "☼",
           "Annotate": "✎", "Add BG": "▣", "Resize": "⤢", "Split": "✂", "Rotate": "⟳",
           "Merge": "⧉", "Protect": "⚿", "Extract": "⧈", "Trim": "✂", "GIF": "∞", "Mute": "⊘",
-          "Frame": "◫"}
+          "Frame": "◫", "Volume": "♫"}
 
 HINTS = {
     "Compress": "Shrink file size", "Metadata": "View · remove GPS", "Redact": "Hide private info",
@@ -55,6 +56,11 @@ VIDEO_FORMAT_HINTS = {"MP4": "Plays everywhere", "WEBM": "Open web format", "MOV
 
 IMAGE_TOOLS = ["Compress", "Resize", "Crop", "Edit", "Annotate", "Redact", "Add BG", "Metadata"]
 VIDEO_TOOLS = ["Compress", "Trim", "Resize", "GIF", "Mute", "Frame"]
+AUDIO_TOOLS = ["Compress", "Trim", "Volume"]
+AUDIO_HINTS = {"Compress": "Shrink · fit a size limit", "Trim": "Cut start and end",
+               "Volume": "Even out · louder · quieter"}
+AUDIO_FORMAT_HINTS = {"MP3": "Plays everywhere", "M4A": "Apple · smaller", "WAV": "Uncompressed",
+                      "FLAC": "Lossless, smaller than WAV", "OGG": "Open format"}
 PDF_TOOLS = ["Compress", "Split", "Rotate", "Protect", "Extract", "Metadata"]
 
 
@@ -252,15 +258,19 @@ class DragShiftApp(QObject):
         ext = Path(paths[0]).suffix
         same = [p for p in paths if category(p) == cat]
         convert_items = []
-        targets = video.targets_for(ext) if cat == "video" else convert.targets_for(cat, ext)
+        targets = {"video": video.targets_for, "audio": audio.targets_for}.get(
+            cat, lambda e: convert.targets_for(cat, e))(ext)
+        hints = {"video": VIDEO_FORMAT_HINTS, "audio": AUDIO_FORMAT_HINTS}.get(cat, FORMAT_HINTS)
         for t in targets:
-            hint = (VIDEO_FORMAT_HINTS if cat == "video" else FORMAT_HINTS).get(t, "")
+            hint = hints.get(t, "")
             if cat == "image" and t == "PDF" and len(same) > 1:
                 hint = f"{len(same)} images → 1 PDF"
             convert_items.append(Item(t, key=f"convert:{t}", hint=hint))
         rings: dict[str, list[Item]] = {"Convert": convert_items}
         if cat == "video":
             rings["Tools"] = [Item(n, GLYPHS[n], key=f"tool:{n}", hint=VIDEO_HINTS[n]) for n in VIDEO_TOOLS]
+        elif cat == "audio":
+            rings["Tools"] = [Item(n, GLYPHS[n], key=f"tool:{n}", hint=AUDIO_HINTS[n]) for n in AUDIO_TOOLS]
         elif cat == "image":
             rings["Tools"] = [Item(n, GLYPHS[n], key=f"tool:{n}", hint=HINTS[n]) for n in IMAGE_TOOLS]
         elif cat == "pdf":
@@ -275,6 +285,9 @@ class DragShiftApp(QObject):
         kind, name = item.key.split(":", 1)
         if cat == "video":
             self.run_video(kind, name, paths)
+            return
+        if cat == "audio":
+            self.run_audio(kind, name, paths)
             return
         if kind == "convert":
             if cat == "image" and name == "PDF" and len(paths) > 1:
@@ -314,6 +327,22 @@ class DragShiftApp(QObject):
                 self.open_window(tools.ResizeWindow(paths, self.notify))
             else:
                 self.open_window(windows[name](paths[0], self.notify))
+        except UserError as e:
+            self.toasts.error(f"Couldn't open {name}", str(e))
+        except Exception as e:  # noqa: BLE001
+            traceback.print_exc()
+            self.toasts.error(f"Couldn't open {name}", friendly_error(e))
+
+    def run_audio(self, kind: str, name: str, paths: list[str]):
+        if kind == "convert":
+            self.submit(f"convert:{name}", paths,
+                        lambda ctl: video.each(paths, ctl, lambda p, c: audio.convert(p, name, c)),
+                        f"Converting to {name}…", cancellable=True)
+            return
+        windows = {"Compress": tools_audio.AudioCompressWindow, "Volume": tools_audio.AudioVolumeWindow,
+                   "Trim": tools_audio.AudioTrimWindow}
+        try:
+            self.open_window(windows[name](paths[0] if name == "Trim" else paths, self.notify))
         except UserError as e:
             self.toasts.error(f"Couldn't open {name}", str(e))
         except Exception as e:  # noqa: BLE001
@@ -585,6 +614,15 @@ def selftest_video(d: Path) -> None:
               tools_video.CompressVideoWindow([clip], n), tools_video.ResizeVideoWindow([clip], n)):
         w.close()
     QThreadPool.globalInstance().waitForDone(10000)   # preview frames still loading
+    sound = video.extract_audio(clip, "MP3", video.Control())[0]
+    for t in audio.targets_for(".mp3"):
+        audio.convert(sound, t, video.Control())
+    audio.compress(sound, video.Control(), quality="Voice")
+    audio.change_volume(sound, video.Control(), "Even out")
+    for w in (tools_audio.AudioTrimWindow(sound, n), tools_audio.AudioCompressWindow([sound], n),
+              tools_audio.AudioVolumeWindow([sound], n)):
+        w.close()
+    QThreadPool.globalInstance().waitForDone(10000)   # waveform still loading
 
 
 def selftest() -> int:

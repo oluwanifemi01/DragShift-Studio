@@ -1,8 +1,8 @@
 # DragShift Studio
 
-Convert and edit images, **videos**, PDFs and documents on **Windows, Mac and Linux** from a liquid-glass radial menu. Start dragging any file, press **Shift**, and drop it on a slice.
+Convert and edit images, **videos**, **audio**, PDFs and documents on **Windows, Mac and Linux** from a liquid-glass radial menu. Start dragging any file, press **Shift**, and drop it on a slice.
 
-DragShift Studio builds on [DragShift](https://github.com/llamaboi55/DragShift) by llamaboi55 and adds video tools and page-range PDF splitting. See [Credits](#credits-and-license).
+DragShift Studio builds on [DragShift](https://github.com/llamaboi55/DragShift) by llamaboi55 and adds video tools, audio tools and page-range PDF splitting. See [Credits](#credits-and-license).
 
 ![DragShift radial menu and Add BG editor](docs/preview.png)
 
@@ -12,7 +12,7 @@ Most people who need to compress a video, split a PDF or blur out an address end
 
 DragShift Studio is meant to be the safer habit: **everything happens on your own computer**.
 
-- **Your files are never uploaded.** Every conversion and edit, video included, runs locally; ffmpeg ships inside the app. There's no account, no cloud service and no analytics.
+- **Your files are never uploaded.** Every conversion and edit, video and audio included, runs locally; ffmpeg ships inside the app. There's no account, no cloud service and no analytics.
 - **Originals are never changed.** Results are saved next to the original as new files, and Undo moves them to the Trash.
 - **Privacy tools built in:** **Redact** burns black boxes into the pixels (not a removable layer), **Metadata** shows and strips camera details and GPS location from photos and author details from PDFs, and **Protect** adds an AES-256 password to a PDF.
 - **Open source:** all the code is in this repository, so anyone can check what it does.
@@ -33,6 +33,13 @@ The only time the app touches the internet is when you click a link yourself. Fo
 - **Mute** removes the sound without re-encoding the picture. **Frame** saves any moment as a full-size PNG (← → step 0.1 s, Shift for 1 s).
 
 Video jobs show a **percentage** and a **Cancel** button. Cancelling stops at once and leaves no half-written files.
+
+**Audio** (MP3, M4A, AAC, WAV, FLAC, OGG, OPUS, WMA, AIFF…):
+
+- **Convert** to MP3, M4A, WAV, FLAC or OGG.
+- **Compress** with a quality preset (High 192 kbps, Balanced 128, Small 96, or **Voice**: 64 kbps mono for lectures and voice memos), or fit a size limit. MP3 stays MP3 and M4A stays M4A.
+- **Trim** on a waveform timeline. The sound is copied as-is, so there's no quality loss.
+- **Volume:** *Even out* brings the loudness to a standard level (like streaming apps do), or make it 3 or 6 dB louder or quieter. Louder never distorts, because peaks are held back.
 
 **PDF Split, your way:** click page thumbnails or type ranges like `1-3, 7, 10-` (`10-` means page 10 to the end). Save one PDF per range, or all the chosen pages in one PDF in the order you typed. You can also split every N pages, or into single pages.
 
@@ -98,7 +105,7 @@ Open **DragShift** from the app menu. It sits in the panel's notification area, 
 
 ## How to use
 
-1. Start dragging a file (an image, video, PDF, Word or text file; desktop shortcuts to one work too) in File Explorer, Finder, your Linux file manager or on the desktop.
+1. Start dragging a file (an image, video, audio, PDF, Word or text file; desktop shortcuts to one work too) in File Explorer, Finder, your Linux file manager or on the desktop.
 2. Press **Shift**. The menu opens under your cursor.
 3. Drop the file on a slice. The result is saved **next to the original**, and the original is never changed.
 4. To switch between **Convert** and **Tools**, tap **Shift** again.
@@ -118,6 +125,7 @@ You can also right-click a file → **DragShift…**, use **Send to → DragShif
 | Word (.docx) | PDF (uses Microsoft Word if it's installed, otherwise a built-in renderer), TXT | — |
 | Text (.txt, .md, .csv…) | PDF, DOCX | — |
 | Video (MP4, MOV, MKV, WEBM, AVI, M4V…) | MP4, WEBM, MOV, **GIF** (first 20 s), **MP3** / **M4A** (just the sound). MP4 ↔ MOV is instant when the codecs allow | **Compress** (by quality, or to fit a size limit such as 10 MB for Discord or 25 MB for email; picks a sensible resolution) · **Trim** (thumbnail timeline with handles; instant, or exact-frame) · **Resize** (1080p, 720p, 480p…) · **GIF** (pick the clip, frame rate and width) · **Mute** · **Frame** (save a still as PNG) |
+| Audio (MP3, M4A, AAC, WAV, FLAC, OGG, OPUS, WMA, AIFF…) | MP3, M4A, WAV, FLAC, OGG | **Compress** (quality presets including mono Voice, or fit a size limit) · **Trim** (waveform timeline, no quality loss) · **Volume** (even out, or ±3 / ±6 dB without distortion) |
 
 **Settings** (tray menu): trigger key (Shift, Ctrl or Alt), where results go (next to the original or a `DragShift` subfolder), JPG/WebP quality, PDF → image resolution, and start at login.
 
@@ -140,7 +148,7 @@ Every push runs these jobs on GitHub's Windows, Mac and Linux machines:
 
 DragShift Studio is based on **[DragShift](https://github.com/llamaboi55/DragShift)**, created by **llamaboi55**. The radial menu, the liquid-glass rendering, the image, PDF and document tools, and the cross-platform build and test setup all come from that project. Thank you for making it open source.
 
-What DragShift Studio adds: the video tools (with bundled [ffmpeg](https://ffmpeg.org) through [`imageio-ffmpeg`](https://github.com/imageio/imageio-ffmpeg)), progress and cancel for long jobs, and page-range PDF splitting.
+What DragShift Studio adds: the video and audio tools (with bundled [ffmpeg](https://ffmpeg.org) through [`imageio-ffmpeg`](https://github.com/imageio/imageio-ffmpeg)), progress and cancel for long jobs, and page-range PDF splitting.
 
 [MIT](LICENSE): free to use, modify and share. The original copyright notice is kept in the license.
 

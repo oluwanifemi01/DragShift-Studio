@@ -70,7 +70,7 @@ def summarize(action: str, srcs: list, outs: list, extra: str = "") -> Result:
     kind, _, name = action.partition(":")
     o0 = outs[0]
     good = ""
-    if category(src) == "video":
+    if category(src) in ("video", "audio"):
         return summarize_video(kind, name, srcs, outs, before, after, extra)
 
     if kind == "convert":
@@ -185,6 +185,8 @@ def summarize_video(kind: str, name: str, srcs: list[Path], outs: list[Path], be
                       bits(change, human_size(after), name_bit), outs, srcs)
     if name == "GIF":
         return Result("GIF created", bits(out_dims, extra, human_size(after), o0.name), outs, srcs)
+    if name == "Volume":
+        return Result("Volume changed", bits(extra, length, human_size(after), o0.name), outs, srcs)
     if name == "Mute":
         return Result("Sound removed", bits(human_size(after), name_bit), outs, srcs)
     if name == "Frame":
