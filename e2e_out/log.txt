@@ -1,0 +1,45 @@
+[   0.00] ChangeDisplaySettings -> 0
+[   8.44] PASS explorer JPG → PNG                            8.4s  Photo.png · 2400×1600
+[  14.73] PASS explorer JPG → WEBP                           5.7s  Photo.webp · 2400×1600
+[  21.87] PASS explorer JPG → HEIC                           6.5s  Photo.heic · 2400×1600
+[  27.71] PASS explorer JPG → TIFF                           5.2s  Photo.tiff · 2400×1600
+[  34.20] PASS explorer JPG → AVIF                           5.9s  Photo.avif · 2400×1600
+[  39.97] PASS explorer JPG → BMP                            5.2s  Photo.bmp · 2400×1600
+[  45.74] PASS explorer JPG → PDF                            5.2s  Photo.pdf · 1 page(s)
+[  51.46] PASS explorer JPG → ICO                            5.1s  Photo.ico · 128×86
+[  57.46] PASS explorer JPG → GIF                            5.4s  Photo.gif · 2400×1600
+[  63.24] PASS explorer PNG → JPG                            5.2s  Graphic.jpg · 800×533
+[  70.16] PASS explorer PDF → JPG (3 pages)                  6.3s  3 × .jpg
+[  77.31] PASS explorer PDF → PNG (3 pages)                  6.5s  3 × .png
+[  83.10] PASS explorer PDF → DOCX                           5.2s  Report.docx
+[  88.85] PASS explorer PDF → TXT                            5.1s  Report.txt
+[  94.62] PASS explorer DOCX → PDF                           5.2s  Letter.pdf · 1 page(s)
+[ 100.37] PASS explorer DOCX → TXT                           5.1s  Letter.txt
+[ 106.13] PASS explorer TXT → PDF                            5.2s  Notes.pdf · 1 page(s)
+[ 111.91] PASS explorer TXT → DOCX                           5.2s  Notes.docx
+[ 119.32] PASS explorer 2 images → 1 PDF                     6.8s  2 images → 2-page PDF
+[ 130.54] PASS explorer Compress to 200 KB                  10.6s  354 KB → 184 KB (48% smaller)
+[ 139.32] PASS explorer Resize 50%                           8.2s  2400×1600 → 1200×800
+[ 148.69] PASS explorer Crop 1:1                             8.8s  2400×1600 → 1600×1600
+[ 159.11] PASS explorer Edit: auto + rotate                  9.8s  2400×1600 → 1600×2400
+[ 170.69] PASS explorer Annotate                            11.0s  Photo Annotated.jpg
+[ 180.74] PASS explorer Redact                               9.4s  Photo Redacted.jpg · centre blacked out
+[ 193.29] PASS explorer Add BG 1:1                          11.9s  2400×1600 → 2976×2976
+[ 201.44] PASS explorer Metadata: remove location            7.6s  GPS removed, kept Apple iPhone 15 Pro
+[ 209.59] PASS explorer Metadata: remove all                 7.5s  0 metadata fields left
+[ 216.23] PASS explorer PDF Compress                         6.0s  227 KB → 108 KB
+[ 224.70] PASS explorer PDF Split 1, 2-3                     7.9s  2 PDFs
+[ 231.36] PASS explorer PDF Rotate                           6.1s  all pages at 90°
+[ 241.22] PASS explorer PDF Protect                          9.3s  AES-256, password works
+[ 247.91] PASS explorer PDF Extract images                   6.1s  1 image(s) in Report images/
+[ 256.06] PASS explorer PDF Metadata                         7.5s  author/title removed
+[ 264.42] PASS explorer Merge 2 PDFs                         7.8s  5 pages
+[ 270.35] PASS send-to  Send To → PNG                        5.3s  Photo.png · 2400×1600
+[ 276.08] PASS desktop  Desktop: JPG → PNG                   5.7s  D-Photo.png · 2400×1600
+[ 281.63] PASS desktop  Desktop: PDF → TXT                   4.9s  D-Report.txt
+[ 287.21] PASS desktop  Desktop: DOCX → PDF                  5.0s  D-Letter.pdf · 1 page(s)
+[ 298.24] PASS desktop  Desktop: Compress                   10.4s  354 KB → 184 KB (48% smaller)
+[ 307.41] PASS desktop  Desktop: Crop                        8.6s  2400×1600 → 1600×1600
+[ 317.55] PASS desktop  Desktop: Add BG                      9.5s  800×533 → 992×992
+[ 325.33] PASS desktop  Desktop: 2 PDFs merge                7.2s  5 pages
+[ 327.12] DONE 44/44 passed
