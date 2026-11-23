@@ -1,0 +1,36 @@
+[   0.01] macOS 26.7.2 screen (1024, 768)
+[  16.04] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[  16.42] measured blob offset (not applied): -1 -34
+[  29.67] PASS JPG → PNG                       11.1s  D-Photo.png · 2400×1600
+[  31.86] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[  41.91] PASS JPG → WEBP                       9.5s  D-Photo.webp · 2400×1600
+[  44.29] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[  55.38] PASS JPG → HEIC                      10.5s  D-Photo.heic · 2400×1600
+[  57.89] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[  67.42] PASS JPG → PDF                        9.0s  D-Photo.pdf · 1 page(s)
+[  69.56] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[  78.98] PASS PNG → JPG                        8.9s  D-Graphic.jpg · 800×533
+[  81.16] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[  90.34] PASS PDF → JPG (3 pages)              8.6s  3 × .jpg
+[  92.40] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 103.11] PASS PDF → TXT                       10.2s  D-Report.txt
+[ 105.27] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 114.93] PASS DOCX → PDF                       9.1s  D-Letter.pdf · 1 page(s)
+[ 116.93] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 130.67] PASS PDF Split 1, 2-3 (window)       13.2s  2 PDFs
+[ 132.84] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 143.67] PASS PDF Rotate                      10.3s  all pages at 90°
+[ 145.42] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 156.34] PASS PDF Compress                    10.4s  227 KB → 108 KB
+[ 159.07] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 173.04] PASS Merge 2 PDFs                    13.4s  5 pages
+[ 175.19] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 187.58] PASS Compress (window, Enter)        11.9s  354 KB → 112 KB
+[ 189.66] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 202.89] PASS Resize 50% (window, Enter)      12.7s  2400×1600 → 1200×800
+[ 205.01] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 218.75] PASS Add BG (window, Enter)          13.2s  800×533 → 992×725
+[ 220.80] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 233.85] PASS Metadata: remove all (Enter)    12.5s  0 metadata fields left
+[ 236.03] icon positions (screen): {'D-Photo.jpg': (140, 148), 'D-Report.pdf': (140, 263), 'D-Appendix.pdf': (140, 378), 'D-Letter.docx': (140, 493), 'D-Graphic.png': (140, 608)}
+[ 237.22] DONE 17/17
