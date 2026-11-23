@@ -131,6 +131,7 @@ class Info:
     vcodec: str
     acodec: str
     fps: float
+    channels: int = 0       # audio channels (1 mono, 2 stereo…); 0 if unknown or no sound
 
     @property
     def has_video(self) -> bool:
@@ -147,7 +148,9 @@ class Info:
 
 _DURATION = re.compile(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)")
 _VIDEO = re.compile(r"Stream #\d+:\d+.*?: Video: (\w+)(.*)")
-_AUDIO = re.compile(r"Stream #\d+:\d+.*?: Audio: (\w+)")
+_AUDIO = re.compile(r"Stream #\d+:\d+.*?: Audio: (\w+)(.*)")
+_CHANNELS = {"mono": 1, "stereo": 2, "2.1": 3, "quad": 4, "4.0": 4, "5.0": 5, "5.1": 6, "6.1": 7, "7.1": 8}
+_N_CHANNELS = re.compile(r"(\d+) channels")
 _DIMS = re.compile(r"[ ,](\d{2,5})x(\d{2,5})[ ,\[]")
 _FPS = re.compile(r"(\d+(?:\.\d+)?) fps")
 _ROTATION = re.compile(r"rotation of (-?\d+(?:\.\d+)?) degrees")
@@ -173,7 +176,16 @@ def parse_info(text: str) -> Info:
     if rm and round(abs(float(rm[1]))) % 180 == 90:     # phone videos shot upright
         w, h = h, w
     am = _AUDIO.search(text)
-    return Info(duration, w, h, vcodec, am[1] if am else "", fps)
+    return Info(duration, w, h, vcodec, am[1] if am else "", fps, _channels(am[2]) if am else 0)
+
+
+def _channels(details: str) -> int:
+    parts = [p.strip().split("(")[0] for p in details.split(",")]
+    for part in parts:
+        if part in _CHANNELS:
+            return _CHANNELS[part]
+    m = _N_CHANNELS.search(details)
+    return int(m[1]) if m else 0
 
 
 def probe(path: str | Path) -> Info:
@@ -181,7 +193,7 @@ def probe(path: str | Path) -> Info:
                        capture_output=True, text=True, errors="replace", **_popen_kw())
     info = parse_info(r.stderr)
     if not info.has_video and not info.has_audio:
-        raise UserError("This file doesn't look like a video DragShift can read.")
+        raise UserError("This file doesn't look like a video or audio file DragShift can read.")
     return info
 
 

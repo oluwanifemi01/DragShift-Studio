@@ -112,6 +112,7 @@ class Timeline(QWidget):
         self.end = self.duration if end is None else min(end, self.duration)
         self.pos = start
         self.thumbs: dict[int, QImage] = {}
+        self.backdrop: QImage | None = None     # one image across the strip (audio waveform)
         self._drag: str | None = None
         self._active = "pos" if mode == "point" else "start"
         self.setMinimumHeight(self.STRIP_H + 30)
@@ -129,6 +130,10 @@ class Timeline(QWidget):
     def t_of(self, x: float) -> float:
         s = self.strip()
         return min(max((x - s.left()) / max(1.0, s.width()) * self.duration, 0.0), self.duration)
+
+    def set_backdrop(self, img: QImage) -> None:
+        self.backdrop = img
+        self.update()
 
     def set_thumb(self, i: int, img: QImage) -> None:
         self.thumbs[i] = img
@@ -193,6 +198,8 @@ class Timeline(QWidget):
         p.setClipPath(clip)
         p.fillRect(s, QColor(255, 255, 255, 25))
         cell = s.width() / STRIP_THUMBS
+        if self.backdrop is not None:
+            p.drawImage(s, self.backdrop, QRectF(self.backdrop.rect()))
         for i, img in self.thumbs.items():
             r = QRectF(s.left() + i * cell, s.top(), cell + 1, s.height())
             src = QRectF(img.rect())
@@ -242,12 +249,15 @@ class Timeline(QWidget):
 # ---------------------------------------------------------------- base windows
 class VideoToolWindow(ToolWindow):
     """Adds probing, cancellable background saving and a subtitle with length and size."""
+    needs = "picture"      # audio windows set "sound"
 
     def __init__(self, title: str, paths, notify, size=(760, 600)):
         super().__init__(title, paths, notify, size=size)
         self.infos = [video.probe(p) for p in self.paths]
-        if not all(i.has_video for i in self.infos):
+        if self.needs == "picture" and not all(i.has_video for i in self.infos):
             raise UserError("This file has sound but no picture.")
+        if self.needs == "sound" and not all(i.has_audio for i in self.infos):
+            raise UserError("This file has no sound to work with.")
         self.info = self.infos[0]
         if len(self.paths) == 1:
             i = self.info
